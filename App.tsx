@@ -3,9 +3,11 @@ import React, { useState, useEffect, useReducer } from 'react';
 import { HashRouter, Routes, Route, Link, useParams, useNavigate } from 'react-router-dom';
 
 import Header from './components/Header';
+import Spinner from './components/Spinner';
 import { PlusIcon, TrashIcon, PencilIcon, EyeIcon, ArrowLeftIcon } from './components/Icon';
 import { QuestionType } from './types';
 import type { User, Form, Question, Submission } from './types';
+import { formsApi, submissionsApi } from './services/apiService';
 
 // --- MOCK DATA & CONSTANTS ---
 const ADMIN_EMAIL = 'g-igasaki@shinko.ed.jp';
@@ -58,7 +60,9 @@ type Action =
   | { type: 'ADD_SUBMISSION'; payload: Submission }
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string | null }
-  | { type: 'SET_STATE'; payload: Omit<AppState, 'loading'|'error'> };
+  | { type: 'SET_STATE'; payload: Omit<AppState, 'loading'|'error'> }
+  | { type: 'SET_FORMS'; payload: Form[] }
+  | { type: 'SET_SUBMISSIONS'; payload: Submission[] };
 
 const initialState: AppState = {
   user: null,
@@ -97,6 +101,10 @@ const appReducer = (state: AppState, action: Action): AppState => {
         return { ...state, error: action.payload, loading: false };
     case 'SET_STATE':
         return { ...state, ...action.payload };
+    case 'SET_FORMS':
+        return { ...state, forms: action.payload };
+    case 'SET_SUBMISSIONS':
+        return { ...state, submissions: action.payload };
     default:
       return state;
   }
@@ -173,36 +181,67 @@ const LoginScreen: React.FC<{ onLogin: (user: User) => void }> = ({ onLogin }) =
     );
 };
 
-const DashboardCard: React.FC<{ form: Form; submissionCount: number; isAdmin: boolean }> = ({ form, submissionCount, isAdmin }) => (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden">
-        <div className="p-6">
-            <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">{form.title}</h3>
-            <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">{form.description}</p>
-            <div className="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400">
-                <span>{form.questions.length} 質問</span>
-                {isAdmin && <span>{submissionCount} 回答</span>}
+const DashboardCard: React.FC<{ form: Form; submissionCount: number; isAdmin: boolean }> = ({ form, submissionCount, isAdmin }) => {
+    // Calculate form status based on submissions
+    const getFormStatus = () => {
+        if (submissionCount === 0) return { text: '未回答', color: 'text-gray-500', bgColor: 'bg-gray-100' };
+        if (submissionCount < 5) return { text: '少数回答', color: 'text-yellow-600', bgColor: 'bg-yellow-100' };
+        if (submissionCount < 20) return { text: '中程度', color: 'text-blue-600', bgColor: 'bg-blue-100' };
+        return { text: '多数回答', color: 'text-green-600', bgColor: 'bg-green-100' };
+    };
+
+    const status = getFormStatus();
+
+    return (
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden">
+            <div className="p-6">
+                <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-xl font-bold text-gray-800 dark:text-white">{form.title}</h3>
+                    {isAdmin && (
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${status.color} ${status.bgColor}`}>
+                            {status.text}
+                        </span>
+                    )}
+                </div>
+                <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">{form.description}</p>
+                <div className="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400">
+                    <span>{form.questions.length} 質問</span>
+                    {isAdmin && (
+                        <div className="flex items-center space-x-2">
+                            <span>{submissionCount} 回答</span>
+                            {submissionCount > 0 && (
+                                <div className="w-16 bg-gray-200 rounded-full h-1.5">
+                                    <div 
+                                        className="bg-blue-600 h-1.5 rounded-full" 
+                                        style={{ width: `${Math.min((submissionCount / 50) * 100, 100)}%` }}
+                                    ></div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
+            </div>
+            <div className="bg-gray-50 dark:bg-gray-700/50 px-6 py-3">
+                 {isAdmin ? (
+                    <div className="flex justify-end space-x-3">
+                         <Link to={`/submissions/${form.id}`} className="flex items-center space-x-1 text-sm font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                            <EyeIcon className="w-4 h-4" />
+                            <span>回答を表示</span>
+                        </Link>
+                        <Link to={`/edit/${form.id}`} className="flex items-center space-x-1 text-sm font-medium text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200">
+                            <PencilIcon className="w-4 h-4" />
+                            <span>編集</span>
+                        </Link>
+                    </div>
+                ) : (
+                    <Link to={`/form/${form.id}`} className="block w-full text-center bg-blue-600 text-white py-2 px-4 rounded-md font-semibold hover:bg-blue-700 transition duration-300">
+                        フォームに回答
+                    </Link>
+                )}
             </div>
         </div>
-        <div className="bg-gray-50 dark:bg-gray-700/50 px-6 py-3">
-             {isAdmin ? (
-                <div className="flex justify-end space-x-3">
-                     <Link to={`/submissions/${form.id}`} className="flex items-center space-x-1 text-sm font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
-                        <EyeIcon className="w-4 h-4" />
-                        <span>回答を表示</span>
-                    </Link>
-                    <Link to={`/edit/${form.id}`} className="flex items-center space-x-1 text-sm font-medium text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200">
-                        <PencilIcon className="w-4 h-4" />
-                        <span>編集</span>
-                    </Link>
-                </div>
-            ) : (
-                <Link to={`/form/${form.id}`} className="block w-full text-center bg-blue-600 text-white py-2 px-4 rounded-md font-semibold hover:bg-blue-700 transition duration-300">
-                    フォームに回答
-                </Link>
-            )}
-        </div>
-    </div>
-);
+    );
+};
 
 const AdminDashboard: React.FC<{ forms: Form[]; submissions: Submission[] }> = ({ forms, submissions }) => {
     return (
@@ -333,7 +372,7 @@ const FillForm: React.FC<{ forms: Form[]; user: User; dispatch: React.Dispatch<A
         });
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         // Basic validation
         for (const q of form.questions) {
@@ -346,17 +385,20 @@ const FillForm: React.FC<{ forms: Form[]; user: User; dispatch: React.Dispatch<A
             }
         }
 
-        dispatch({
-            type: 'ADD_SUBMISSION',
-            payload: {
-                id: `sub-${Date.now()}`,
+        try {
+            const submissionData = {
                 formId: form.id,
                 submittedBy: user.email,
                 answers,
-                submittedAt: new Date().toISOString(),
-            }
-        });
-        setSubmitted(true);
+            };
+
+            const newSubmission = await submissionsApi.create(submissionData);
+            dispatch({ type: 'ADD_SUBMISSION', payload: newSubmission });
+            setSubmitted(true);
+        } catch (error) {
+            console.error('Failed to submit form:', error);
+            alert('フォームの送信に失敗しました。');
+        }
     };
 
     if (submitted) {
@@ -459,27 +501,33 @@ const FormBuilder: React.FC<{ user: User; dispatch: React.Dispatch<Action>; form
         setQuestions(questions.filter((_, i) => i !== index));
     };
     
-    const saveForm = () => {
+    const saveForm = async () => {
         if (!title) {
             alert('フォームのタイトルは必須です。');
             return;
         }
         
-        const form: Form = {
-            id: existingForm?.id || `form-${Date.now()}`,
-            title,
-            description,
-            questions,
-            createdBy: user.email,
-        };
-        
-        if (existingForm) {
-            dispatch({ type: 'UPDATE_FORM', payload: form });
-        } else {
-            dispatch({ type: 'ADD_FORM', payload: form });
+        try {
+            const formData = {
+                title,
+                description,
+                questions,
+                createdBy: user.email,
+            };
+            
+            if (existingForm) {
+                const updatedForm = await formsApi.update(existingForm.id, formData);
+                dispatch({ type: 'UPDATE_FORM', payload: updatedForm });
+            } else {
+                const newForm = await formsApi.create(formData);
+                dispatch({ type: 'ADD_FORM', payload: newForm });
+            }
+            
+            navigate('/');
+        } catch (error) {
+            console.error('Failed to save form:', error);
+            alert('フォームの保存に失敗しました。');
         }
-        
-        navigate('/');
     };
 
     return (
@@ -580,28 +628,38 @@ function App() {
   const [state, dispatch] = useReducer(appReducer, initialState);
 
   useEffect(() => {
-    // Simulate loading initial data
-    dispatch({ type: 'SET_LOADING', payload: true });
-    try {
+    const loadInitialData = async () => {
+      try {
+        dispatch({ type: 'SET_LOADING', payload: true });
+        
+        // Load user from localStorage
         const storedStateJSON = localStorage.getItem('form-builder-state');
+        let user = null;
         if (storedStateJSON) {
+          try {
             const storedState = JSON.parse(storedStateJSON);
-            const loadedState = {
-                user: storedState.user || null,
-                forms: storedState.forms && storedState.forms.length > 0 ? storedState.forms : initialForms,
-                submissions: storedState.submissions || [],
-            };
-            dispatch({ type: 'SET_STATE', payload: loadedState });
-        } else {
-             dispatch({ type: 'SET_STATE', payload: { user: null, forms: initialForms, submissions: [] } });
+            user = storedState.user || null;
+          } catch (error) {
+            console.error("Failed to parse localStorage:", error);
+          }
         }
-    } catch (error) {
-        console.error("Failed to parse localStorage:", error);
-        dispatch({ type: 'SET_STATE', payload: { user: null, forms: initialForms, submissions: [] } });
-    } finally {
+        
+        // Load forms and submissions from API
+        const [forms, submissions] = await Promise.all([
+          formsApi.getAll().catch(() => initialForms), // Fallback to initial forms if API fails
+          submissionsApi.getAll().catch(() => [])
+        ]);
+        
+        dispatch({ type: 'SET_STATE', payload: { user, forms, submissions } });
         dispatch({ type: 'SET_LOADING', payload: false });
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+      } catch (error) {
+        console.error('Failed to load initial data:', error);
+        dispatch({ type: 'SET_ERROR', payload: 'データの読み込みに失敗しました。' });
+        dispatch({ type: 'SET_LOADING', payload: false });
+      }
+    };
+
+    loadInitialData();
   }, []);
 
   useEffect(() => {
