@@ -30,6 +30,17 @@ export interface Submission {
   submittedAt: string;
 }
 
+export interface Checkin {
+  id: string;
+  submissionId: string;
+  formId: string;
+  participantName: string;
+  checkinTime: string;
+  notes: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
 export interface User {
   email: string;
   role: 'admin' | 'user';

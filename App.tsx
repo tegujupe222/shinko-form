@@ -4,10 +4,15 @@ import { HashRouter, Routes, Route, Link, useParams, useNavigate } from 'react-r
 
 import Header from './components/Header';
 import Spinner from './components/Spinner';
+import Statistics from './components/Statistics';
+import AdvancedStatistics from './components/AdvancedStatistics';
+import SchoolTemplates from './components/SchoolTemplates';
+import CheckinManager from './components/CheckinManager';
 import { PlusIcon, TrashIcon, PencilIcon, EyeIcon, ArrowLeftIcon } from './components/Icon';
 import { QuestionType } from './types';
 import type { User, Form, Question, Submission } from './types';
 import { formsApi, submissionsApi } from './services/apiService';
+import { sendNotificationEmail, generateAndDownloadReceipt, sendAdminNotification } from './utils/notificationUtils';
 
 // --- MOCK DATA & CONSTANTS ---
 const ADMIN_EMAIL = 'g-igasaki@shinko.ed.jp';
@@ -17,26 +22,49 @@ const USER_EMAIL = 'user@example.com';
 const initialForms: Form[] = [
   {
     id: 'form-1',
-    title: 'コミュニティミートアップ参加確認',
-    description: '四半期ごとのコミュニティミートアップにご参加ください。参加可能かどうかお知らせください！',
+    title: '学校説明会参加申込フォーム',
+    description: '本校の学校説明会への参加をお申し込みください。ご不明な点がございましたら、お気軽にお問い合わせください。',
     createdBy: ADMIN_EMAIL,
     questions: [
-      { id: 'q1', text: 'お名前', type: QuestionType.TEXT, required: true },
-      { id: 'q2', text: 'メールアドレス', type: QuestionType.TEXT, required: true },
-      { id: 'q3', text: '食事制限', type: QuestionType.TEXTAREA, required: false },
-      { id: 'q4', text: 'Tシャツサイズ', type: QuestionType.RADIO, options: ['S', 'M', 'L', 'XL'], required: true },
+      { id: 'q1', text: '保護者氏名', type: QuestionType.TEXT, required: true },
+      { id: 'q2', text: 'お子様氏名', type: QuestionType.TEXT, required: true },
+      { id: 'q3', text: 'お子様の学年', type: QuestionType.RADIO, options: ['小学5年生', '小学6年生', '中学1年生', '中学2年生', '中学3年生'], required: true },
+      { id: 'q4', text: 'メールアドレス', type: QuestionType.TEXT, required: true },
+      { id: 'q5', text: '電話番号', type: QuestionType.TEXT, required: true },
+      { id: 'q6', text: '参加希望日時', type: QuestionType.RADIO, options: ['第1回: 6月15日(土) 10:00-12:00', '第2回: 7月20日(土) 14:00-16:00', '第3回: 9月14日(土) 10:00-12:00'], required: true },
+      { id: 'q7', text: '参加人数', type: QuestionType.RADIO, options: ['1名（保護者のみ）', '2名（保護者+お子様）', '3名以上'], required: true },
+      { id: 'q8', text: '本校への志望度', type: QuestionType.RADIO, options: ['非常に高い', '高い', '普通', '低い', '未定'], required: true },
+      { id: 'q9', text: 'ご質問・ご要望', type: QuestionType.TEXTAREA, required: false },
     ],
   },
   {
     id: 'form-2',
-    title: 'ワークショップフィードバック',
-    description: 'ワークショップにご参加いただき、ありがとうございます。フィードバックをお聞かせください。',
+    title: '学校説明会アンケート',
+    description: '学校説明会にご参加いただき、ありがとうございました。今後の改善のため、アンケートにご協力ください。',
     createdBy: ADMIN_EMAIL,
     questions: [
-      { id: 'q5', text: 'どのワークショップに参加されましたか？', type: QuestionType.TEXT, required: true },
-      { id: 'q6', text: '全体的な満足度', type: QuestionType.RADIO, options: ['非常に満足', '満足', '普通', '不満', '非常に不満'], required: true },
-      { id: 'q7', text: '最も良かった点は？', type: QuestionType.TEXTAREA, required: false },
-      { id: 'q8', text: '改善提案があれば教えてください', type: QuestionType.TEXTAREA, required: false },
+      { id: 'q10', text: '参加者氏名', type: QuestionType.TEXT, required: true },
+      { id: 'q11', text: '説明会の満足度', type: QuestionType.RADIO, options: ['非常に満足', '満足', '普通', '不満', '非常に不満'], required: true },
+      { id: 'q12', text: '最も印象に残った内容', type: QuestionType.TEXTAREA, required: false },
+      { id: 'q13', text: '本校への志望度の変化', type: QuestionType.RADIO, options: ['非常に高くなった', '高くなった', '変わらない', '低くなった', '非常に低くなった'], required: true },
+      { id: 'q14', text: '今後の説明会で聞きたい内容', type: QuestionType.TEXTAREA, required: false },
+      { id: 'q15', text: 'その他のご意見・ご感想', type: QuestionType.TEXTAREA, required: false },
+    ],
+  },
+  {
+    id: 'form-3',
+    title: '体験授業参加申込',
+    description: '本校の体験授業にご参加いただけます。実際の授業を体験して、本校の教育内容をご理解ください。',
+    createdBy: ADMIN_EMAIL,
+    questions: [
+      { id: 'q16', text: '保護者氏名', type: QuestionType.TEXT, required: true },
+      { id: 'q17', text: 'お子様氏名', type: QuestionType.TEXT, required: true },
+      { id: 'q18', text: 'お子様の学年', type: QuestionType.RADIO, options: ['小学5年生', '小学6年生', '中学1年生', '中学2年生'], required: true },
+      { id: 'q19', text: '希望体験授業', type: QuestionType.RADIO, options: ['英語', '数学', '理科実験', '体育', '音楽', '美術'], required: true },
+      { id: 'q20', text: '希望日時', type: QuestionType.RADIO, options: ['8月5日(土) 9:00-11:00', '8月12日(土) 9:00-11:00', '8月19日(土) 9:00-11:00'], required: true },
+      { id: 'q21', text: '連絡先メールアドレス', type: QuestionType.TEXT, required: true },
+      { id: 'q22', text: '連絡先電話番号', type: QuestionType.TEXT, required: true },
+      { id: 'q23', text: 'お子様の特技・興味', type: QuestionType.TEXTAREA, required: false },
     ],
   }
 ];
@@ -134,7 +162,7 @@ const LoginScreen: React.FC<{ onLogin: (user: User) => void }> = ({ onLogin }) =
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
             <div className="p-8 bg-white dark:bg-gray-800 rounded-lg shadow-xl text-center w-full max-w-sm">
-                <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">AI フォームビルダー</h1>
+                <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">SGformer</h1>
                 <p className="text-gray-600 dark:text-gray-300 mb-6">ログインしてください</p>
                 
                 <div className="space-y-4 mb-6">
@@ -247,12 +275,25 @@ const AdminDashboard: React.FC<{ forms: Form[]; submissions: Submission[] }> = (
     return (
         <div className="p-4 sm:p-6 lg:p-8">
             <div className="flex justify-between items-center mb-6">
-                <h2 className="text-3xl font-bold text-gray-800 dark:text-white">マイフォーム</h2>
-                <Link to="/new" className="flex items-center space-x-2 bg-blue-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-blue-700 transition duration-300">
-                    <PlusIcon className="w-5 h-5" />
-                    <span>フォーム作成</span>
-                </Link>
+                <h2 className="text-3xl font-bold text-gray-800 dark:text-white">SGformer 管理ダッシュボード</h2>
+                <div className="flex space-x-4">
+                    <Link to="/checkin" className="flex items-center space-x-2 bg-green-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-green-700 transition duration-300">
+                        <EyeIcon className="w-5 h-5" />
+                        <span>受付管理</span>
+                    </Link>
+                    <Link to="/new" className="flex items-center space-x-2 bg-blue-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-blue-700 transition duration-300">
+                        <PlusIcon className="w-5 h-5" />
+                        <span>フォーム作成</span>
+                    </Link>
+                </div>
             </div>
+            
+            {/* 統計情報 */}
+            <Statistics forms={forms} submissions={submissions} />
+            
+            {/* 詳細統計分析 */}
+            <AdvancedStatistics forms={forms} submissions={submissions} />
+            
             {forms.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {forms.map(form => (
@@ -344,6 +385,7 @@ const FillForm: React.FC<{ forms: Form[]; user: User; dispatch: React.Dispatch<A
     const form = forms.find(f => f.id === formId);
     const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
     const [submitted, setSubmitted] = useState(false);
+    const [processing, setProcessing] = useState(false);
 
     useEffect(() => {
         if (form) {
@@ -374,12 +416,15 @@ const FillForm: React.FC<{ forms: Form[]; user: User; dispatch: React.Dispatch<A
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setProcessing(true);
+        
         // Basic validation
         for (const q of form.questions) {
             if (q.required) {
                 const answer = answers[q.id];
                 if (!answer || (Array.isArray(answer) && answer.length === 0)) {
                     alert(`質問「${q.text}」は必須です。`);
+                    setProcessing(false);
                     return;
                 }
             }
@@ -394,10 +439,36 @@ const FillForm: React.FC<{ forms: Form[]; user: User; dispatch: React.Dispatch<A
 
             const newSubmission = await submissionsApi.create(submissionData);
             dispatch({ type: 'ADD_SUBMISSION', payload: newSubmission });
+            
+            // メール通知を送信
+            try {
+                await sendNotificationEmail(form, newSubmission, user.email);
+            } catch (emailError) {
+                console.error('Email notification failed:', emailError);
+                // メール送信の失敗はユーザーに通知しない
+            }
+            
+            // 管理者に通知
+            try {
+                await sendAdminNotification(form, newSubmission);
+            } catch (adminEmailError) {
+                console.error('Admin notification failed:', adminEmailError);
+            }
+            
+            // PDF受付表を生成・ダウンロード
+            try {
+                await generateAndDownloadReceipt(form, newSubmission);
+            } catch (pdfError) {
+                console.error('PDF generation failed:', pdfError);
+                // PDF生成の失敗はユーザーに通知しない
+            }
+            
             setSubmitted(true);
         } catch (error) {
             console.error('Failed to submit form:', error);
             alert('フォームの送信に失敗しました。');
+        } finally {
+            setProcessing(false);
         }
     };
 
@@ -405,7 +476,19 @@ const FillForm: React.FC<{ forms: Form[]; user: User; dispatch: React.Dispatch<A
         return (
              <div className="max-w-2xl mx-auto p-8 text-center">
                  <h2 className="text-3xl font-bold text-green-600 dark:text-green-400 mb-4">ありがとうございます！</h2>
-                 <p className="text-lg text-gray-700 dark:text-gray-200 mb-6">回答が記録されました。</p>
+                 <p className="text-lg text-gray-700 dark:text-gray-200 mb-6">
+                     回答が記録されました。<br />
+                     確認メールをお送りしましたので、ご確認ください。<br />
+                     受付表のPDFも自動的にダウンロードされました。
+                 </p>
+                 <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg mb-6">
+                     <h3 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">次のステップ</h3>
+                     <ul className="text-sm text-blue-700 dark:text-blue-300 text-left space-y-1">
+                         <li>• メールボックスで確認メールをご確認ください</li>
+                         <li>• ダウンロードされた受付表を大切に保管してください</li>
+                         <li>• 受付表のQRコードには個人情報が含まれています</li>
+                     </ul>
+                 </div>
                  <Link to="/" className="bg-blue-600 text-white py-2 px-6 rounded-lg font-semibold hover:bg-blue-700 transition duration-300">
                      フォーム一覧に戻る
                  </Link>
@@ -439,7 +522,24 @@ const FillForm: React.FC<{ forms: Form[]; user: User; dispatch: React.Dispatch<A
                             ))}
                         </div>
                     ))}
-                    <button type="submit" className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition duration-300">送信</button>
+                    <button 
+                        type="submit" 
+                        disabled={processing}
+                        className={`w-full py-3 px-4 rounded-lg font-semibold transition duration-300 ${
+                            processing 
+                                ? 'bg-gray-400 cursor-not-allowed' 
+                                : 'bg-blue-600 hover:bg-blue-700'
+                        } text-white`}
+                    >
+                        {processing ? (
+                            <div className="flex items-center justify-center">
+                                <Spinner size="sm" />
+                                <span className="ml-2">送信中...</span>
+                            </div>
+                        ) : (
+                            '送信'
+                        )}
+                    </button>
                 </form>
             </div>
         </div>
@@ -454,14 +554,23 @@ const FormBuilder: React.FC<{ user: User; dispatch: React.Dispatch<Action>; form
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [questions, setQuestions] = useState<Question[]>([]);
+    const [showTemplates, setShowTemplates] = useState(!existingForm);
 
     useEffect(() => {
         if (existingForm) {
             setTitle(existingForm.title);
             setDescription(existingForm.description);
             setQuestions(existingForm.questions);
+            setShowTemplates(false);
         }
     }, [existingForm]);
+
+    const handleTemplateSelect = (template: Form) => {
+        setTitle(template.title);
+        setDescription(template.description);
+        setQuestions(template.questions);
+        setShowTemplates(false);
+    };
 
     const addQuestion = () => {
         setQuestions([...questions, { id: `q-${Date.now()}`, text: '', type: QuestionType.TEXT, required: false }]);
@@ -538,6 +647,21 @@ const FormBuilder: React.FC<{ user: User; dispatch: React.Dispatch<Action>; form
             </button>
             <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-6">{existingForm ? 'フォーム編集' : '新しいフォーム作成'}</h2>
             
+            {showTemplates && !existingForm && (
+                <SchoolTemplates onSelectTemplate={handleTemplateSelect} />
+            )}
+            
+            {!showTemplates && (
+                <div className="mb-4">
+                    <button 
+                        onClick={() => setShowTemplates(true)} 
+                        className="text-blue-600 dark:text-blue-400 hover:underline text-sm"
+                    >
+                        ← テンプレートから選択
+                    </button>
+                </div>
+            )}
+            
             <div className="space-y-8 bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md">
                 <div className="space-y-4">
                     <div>
@@ -608,6 +732,7 @@ const AdminRoutes: React.FC<Omit<AppState, 'loading'|'error'> & { dispatch: Reac
             <Route path="/new" element={<FormBuilder user={user!} dispatch={dispatch} forms={forms} />} />
             <Route path="/edit/:formId" element={<FormBuilder user={user!} dispatch={dispatch} forms={forms} />} />
             <Route path="/submissions/:formId" element={<ViewSubmissions forms={forms} submissions={submissions} />} />
+            <Route path="/checkin" element={<CheckinManager forms={forms} submissions={submissions} />} />
         </Routes>
     );
 }
@@ -699,7 +824,7 @@ function App() {
        <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
             {state.user ? (
                 <>
-                    <Header user={state.user} onLogout={handleLogout} />
+                    <Header user={state.user} onLogout={handleLogout} title="SGformer" />
                     <main>
                         {state.user.role === 'admin' ? 
                             <AdminRoutes {...state} dispatch={dispatch} /> : 
