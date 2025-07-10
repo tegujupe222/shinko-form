@@ -1,0 +1,5 @@
+{
+  "name": "AI-Powered Form Builder",
+  "description": "An application for creating and managing event registration forms. Admins can create forms, optionally using an AI assistant, and view submissions. Users can find and fill out forms.",
+  "requestFramePermissions": []
+}
