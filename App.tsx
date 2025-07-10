@@ -160,50 +160,91 @@ const LoginScreen: React.FC<{ onLogin: (user: User) => void }> = ({ onLogin }) =
     };
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
-            <div className="p-8 bg-white dark:bg-gray-800 rounded-lg shadow-xl text-center w-full max-w-sm">
-                <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">SGformer</h1>
-                <p className="text-gray-600 dark:text-gray-300 mb-6">ログインしてください</p>
-                
-                <div className="space-y-4 mb-6">
-                    <div>
-                        <input
-                            type="email"
-                            placeholder="メールアドレス"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900 dark:to-purple-900 flex items-center justify-center p-4">
+            <div className="w-full max-w-md">
+                {/* Logo and Brand */}
+                <div className="text-center mb-8">
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl mb-4 shadow-lg">
+                        <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
                     </div>
-                    <div>
-                        <input
-                            type="password"
-                            placeholder="パスワード"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                    </div>
-                    {error && (
-                        <p className="text-red-500 text-sm">{error}</p>
-                    )}
+                    <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">SGformer</h1>
+                    <p className="text-gray-600 dark:text-gray-300 text-sm">教育現場のフォーム管理システム</p>
                 </div>
 
-                <div className="space-y-4">
-                    <button 
-                        onClick={handleAdminLogin} 
-                        className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition duration-300"
-                    >
-                        管理者としてログイン
-                    </button>
-                    <button 
-                        onClick={handleUserLogin} 
-                        className="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-green-700 transition duration-300"
-                    >
-                        ユーザーとしてログイン
-                    </button>
+                {/* Login Card */}
+                <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-2xl border border-white/20 dark:border-gray-700/50 p-8">
+                    <div className="text-center mb-6">
+                        <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-2">ログイン</h2>
+                        <p className="text-gray-500 dark:text-gray-400 text-sm">アカウントにアクセスしてください</p>
+                    </div>
+                    
+                    <div className="space-y-5 mb-6">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">メールアドレス</label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                                    </svg>
+                                </div>
+                                <input
+                                    type="email"
+                                    placeholder="admin@example.com"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-all duration-200"
+                                />
+                            </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">パスワード</label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                    </svg>
+                                </div>
+                                <input
+                                    type="password"
+                                    placeholder="••••••••"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-3 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-all duration-200"
+                                />
+                            </div>
+                        </div>
+                        
+                        {error && (
+                            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
+                                <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="space-y-3">
+                        <button 
+                            onClick={handleAdminLogin} 
+                            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transform hover:scale-[1.02] transition-all duration-200 shadow-lg"
+                        >
+                            管理者としてログイン
+                        </button>
+                        <button 
+                            onClick={handleUserLogin} 
+                            className="w-full bg-gray-600 text-white py-3 px-4 rounded-xl font-semibold hover:bg-gray-700 transform hover:scale-[1.02] transition-all duration-200 shadow-lg"
+                        >
+                            ユーザーとしてログイン
+                        </button>
+                    </div>
+                    
+                    <div className="mt-6 text-center">
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                            デモ用: {ADMIN_EMAIL}
+                        </p>
+                    </div>
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-6">管理者: {ADMIN_EMAIL}</p>
             </div>
         </div>
     );
@@ -221,26 +262,36 @@ const DashboardCard: React.FC<{ form: Form; submissionCount: number; isAdmin: bo
     const status = getFormStatus();
 
     return (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden">
+        <div className="group bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 dark:border-gray-700 hover:scale-[1.02]">
             <div className="p-6">
-                <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-xl font-bold text-gray-800 dark:text-white">{form.title}</h3>
+                <div className="flex justify-between items-start mb-4">
+                    <h3 className="text-xl font-bold text-gray-800 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200">{form.title}</h3>
                     {isAdmin && (
-                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${status.color} ${status.bgColor}`}>
+                        <span className={`px-3 py-1 text-xs font-semibold rounded-full ${status.color} ${status.bgColor} shadow-sm`}>
                             {status.text}
                         </span>
                     )}
                 </div>
-                <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2">{form.description}</p>
-                <div className="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400">
-                    <span>{form.questions.length} 質問</span>
+                <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-2 leading-relaxed">{form.description}</p>
+                <div className="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400 mb-4">
+                    <span className="flex items-center space-x-1">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>{form.questions.length} 質問</span>
+                    </span>
                     {isAdmin && (
                         <div className="flex items-center space-x-2">
-                            <span>{submissionCount} 回答</span>
+                            <span className="flex items-center space-x-1">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                                <span>{submissionCount} 回答</span>
+                            </span>
                             {submissionCount > 0 && (
-                                <div className="w-16 bg-gray-200 rounded-full h-1.5">
+                                <div className="w-16 bg-gray-200 dark:bg-gray-600 rounded-full h-1.5">
                                     <div 
-                                        className="bg-blue-600 h-1.5 rounded-full" 
+                                        className="bg-gradient-to-r from-blue-500 to-purple-500 h-1.5 rounded-full transition-all duration-300" 
                                         style={{ width: `${Math.min((submissionCount / 50) * 100, 100)}%` }}
                                     ></div>
                                 </div>
@@ -249,20 +300,20 @@ const DashboardCard: React.FC<{ form: Form; submissionCount: number; isAdmin: bo
                     )}
                 </div>
             </div>
-            <div className="bg-gray-50 dark:bg-gray-700/50 px-6 py-3">
+            <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700/50 dark:to-gray-600/50 px-6 py-4 border-t border-gray-100 dark:border-gray-600">
                  {isAdmin ? (
                     <div className="flex justify-end space-x-3">
-                         <Link to={`/submissions/${form.id}`} className="flex items-center space-x-1 text-sm font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                         <Link to={`/submissions/${form.id}`} className="flex items-center space-x-2 text-sm font-medium text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors duration-200">
                             <EyeIcon className="w-4 h-4" />
                             <span>回答を表示</span>
                         </Link>
-                        <Link to={`/edit/${form.id}`} className="flex items-center space-x-1 text-sm font-medium text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200">
+                        <Link to={`/edit/${form.id}`} className="flex items-center space-x-2 text-sm font-medium text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 transition-colors duration-200">
                             <PencilIcon className="w-4 h-4" />
                             <span>編集</span>
                         </Link>
                     </div>
                 ) : (
-                    <Link to={`/form/${form.id}`} className="block w-full text-center bg-blue-600 text-white py-2 px-4 rounded-md font-semibold hover:bg-blue-700 transition duration-300">
+                    <Link to={`/form/${form.id}`} className="block w-full text-center bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transform hover:scale-[1.02] transition-all duration-200 shadow-lg">
                         フォームに回答
                     </Link>
                 )}
@@ -273,15 +324,18 @@ const DashboardCard: React.FC<{ form: Form; submissionCount: number; isAdmin: bo
 
 const AdminDashboard: React.FC<{ forms: Form[]; submissions: Submission[] }> = ({ forms, submissions }) => {
     return (
-        <div className="p-4 sm:p-6 lg:p-8">
-            <div className="flex justify-between items-center mb-6">
-                <h2 className="text-3xl font-bold text-gray-800 dark:text-white">SGformer 管理ダッシュボード</h2>
-                <div className="flex space-x-4">
-                    <Link to="/checkin" className="flex items-center space-x-2 bg-green-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-green-700 transition duration-300">
+        <div className="p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-blue-900 min-h-screen">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 space-y-4 lg:space-y-0">
+                <div>
+                    <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">SGformer 管理ダッシュボード</h2>
+                    <p className="text-gray-600 dark:text-gray-300">フォームと回答を効率的に管理</p>
+                </div>
+                <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
+                    <Link to="/checkin" className="flex items-center justify-center space-x-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-green-700 hover:to-emerald-700 transform hover:scale-[1.02] transition-all duration-200 shadow-lg">
                         <EyeIcon className="w-5 h-5" />
                         <span>受付管理</span>
                     </Link>
-                    <Link to="/new" className="flex items-center space-x-2 bg-blue-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-blue-700 transition duration-300">
+                    <Link to="/new" className="flex items-center justify-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transform hover:scale-[1.02] transition-all duration-200 shadow-lg">
                         <PlusIcon className="w-5 h-5" />
                         <span>フォーム作成</span>
                     </Link>
@@ -301,9 +355,18 @@ const AdminDashboard: React.FC<{ forms: Form[]; submissions: Submission[] }> = (
                     ))}
                 </div>
             ) : (
-                <div className="text-center py-16 px-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-                    <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-200">まだフォームがありません！</h3>
-                    <p className="text-gray-500 dark:text-gray-400 mt-2">「フォーム作成」をクリックして始めましょう。</p>
+                <div className="text-center py-20 px-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700">
+                    <div className="w-16 h-16 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg className="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">まだフォームがありません！</h3>
+                    <p className="text-gray-600 dark:text-gray-300 mb-6">「フォーム作成」をクリックして始めましょう。</p>
+                    <Link to="/new" className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transform hover:scale-[1.02] transition-all duration-200 shadow-lg">
+                        <PlusIcon className="w-5 h-5" />
+                        <span>フォームを作成</span>
+                    </Link>
                 </div>
             )}
         </div>
@@ -312,8 +375,11 @@ const AdminDashboard: React.FC<{ forms: Form[]; submissions: Submission[] }> = (
 
 const UserDashboard: React.FC<{ forms: Form[] }> = ({ forms }) => {
     return (
-        <div className="p-4 sm:p-6 lg:p-8">
-            <h2 className="text-3xl font-bold text-gray-800 dark:text-white mb-6">利用可能なフォーム</h2>
+        <div className="p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-blue-900 min-h-screen">
+            <div className="mb-8">
+                <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">利用可能なフォーム</h2>
+                <p className="text-gray-600 dark:text-gray-300">回答可能なフォームを選択してください</p>
+            </div>
             {forms.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {forms.map(form => (
@@ -321,9 +387,14 @@ const UserDashboard: React.FC<{ forms: Form[] }> = ({ forms }) => {
                     ))}
                 </div>
             ) : (
-                <div className="text-center py-16 px-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-                    <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-200">現在利用可能なフォームはありません。</h3>
-                    <p className="text-gray-500 dark:text-gray-400 mt-2">後でまた確認してください。</p>
+                <div className="text-center py-20 px-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700">
+                    <div className="w-16 h-16 bg-gradient-to-r from-gray-100 to-blue-100 dark:from-gray-900 dark:to-blue-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg className="w-8 h-8 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">現在利用可能なフォームはありません</h3>
+                    <p className="text-gray-600 dark:text-gray-300">後でまた確認してください。</p>
                 </div>
             )}
         </div>
