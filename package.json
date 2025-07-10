@@ -7,10 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "vercel-build": "vite build",
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "vercel-build": "vite build"
   },
   "dependencies": {
     "@types/nodemailer": "^6.4.17",
